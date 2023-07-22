@@ -230,11 +230,11 @@ quit;
 
 /* Confusion matrix */
 proc freq data=mycas.train_scored;
-	table _label_*_DL_predname_;
+	table _label_*_DL_predname_ / nopercent nocol norow;
 run;
 
 * Checking some scores with images;
-%let d=10;
+%let d=15;
 
 data _null_;
 	set mycas.train_scored
