@@ -13,8 +13,14 @@ options mprint  mlogic mautosource mcompile mlogicnest mprintnest msglevel=n min
 Run Terminate below if necessary to reset the session.*/
 
 cas casauto terminate;
-/* To make a new CAS library */
-libname mycas cas;
+
+/* --Generate SAS librefs for caslibs-- */
+
+/* Create a default CAS session and create SAS librefs for existing caslibs */
+/* so that they are visible in the SAS Studio Libraries tree. */
+cas mySession;
+caslib _all_ assign;
+
 
 %macro display_img(d=);
 /*
@@ -102,23 +108,23 @@ label: label of the image and subfolder where the image will be saved
 
 	proc cas;
 		/* Original images */
-	   image.saveImages / caslib="imagelib" prefix="" overwrite=TRUE
+	   image.saveImages / caslib="casuser" prefix="" overwrite=TRUE
 	   subdirectory="LargetrainDataTr/&label."
 	   images = {table={name='LargetrainData' where="_label_='&label.'"} image='_image_'};
 		/* Images with the mutation HORIZONTAL_FLIP */
-	   image.saveImages / caslib="imagelib" prefix="hor" overwrite=TRUE 
+	   image.saveImages / caslib="casuser" prefix="hor" overwrite=TRUE 
 	   subdirectory="LargetrainDataTr/&label."
 	   images = {table={name='hor' where="_label_='&label.'"} image='_image_'};
 		/* Images with the mutation SHARPEN */
-	   image.saveImages / caslib="imagelib" prefix="sharp" overwrite=TRUE
+	   image.saveImages / caslib="casuser" prefix="sharp" overwrite=TRUE
 	   subdirectory="LargetrainDataTr/&label."
 	   images = {table={name='sharp' where="_label_='&label.'"} image='_image_'};
 		/* Images with the mutation DARKEN */
-	   image.saveImages / caslib="imagelib" prefix="dark" overwrite=TRUE
+	   image.saveImages / caslib="casuser" prefix="dark" overwrite=TRUE
 	   subdirectory="LargetrainDataTr/&label."
 	   images = {table={name='dark' where="_label_='&label.'"} image='_image_'};
 		/* Images with the mutation LIGHTEN */
-	   image.saveImages / caslib="imagelib" prefix="light" overwrite=TRUE
+	   image.saveImages / caslib="casuser" prefix="light" overwrite=TRUE
 	   subdirectory="LargetrainDataTr/&label."
 	   images = {table={name='light' where="_label_='&label.'"} image='_image_'};
 	run;
@@ -141,14 +147,13 @@ Attention: Change the path in according to your SAS Viya session */
 proc cas;
    	loadactionset 'table';
 	loadactionset 'image';
-	table.addCaslib / name='imagelib' path='/shared/home/perez-jose@lasallistas.org.mx/ModelosPredictivos/Image_Data/' subdirectories=true;
-	image.loadimages / caslib='imagelib' path='LargetrainData' recurse=true labellevels=1 decode=true casout={name='LargetrainData', replace=true};
+	image.loadimages / caslib='CASUSER' path='LargetrainData' recurse=true labellevels=1 decode=true casout={name='LargetrainData', replace=true};
 quit;
 
 /* Use PROC PARTITION to partition  each folder of images into train nd validation data partitions.  */
-proc partition data=mycas.LargetrainData samppct=80 samppct2=20 seed=2023 partind;
+proc partition data=casuser.LargetrainData samppct=80 samppct2=20 seed=2026 partind;
      by _label_;
-     output out=mycas.LargeImageData;
+     output out=casuser.LargeImageData;
 run;
 
 /* Use the shuffle action to  randomly sort the data */
@@ -254,7 +259,7 @@ proc cas;
         			algorithm={method='ADAM', lrpolicy='Step', gamma=0.6, stepsize=10,
        							beta1=0.9, beta2=0.999, learningrate=.01}
         			maxepochs=60} 
-        seed=2023;
+        seed=2026;
 quit;
 
 /* Score the data set					*/
@@ -268,7 +273,7 @@ quit;
 
 /* Confusion matrix */
 title "Confusion matrix with the original images";
-proc freq data=mycas.train_scored;
+proc freq data=casuser.train_scored;
 	table _label_*_DL_predname_ / nopercent nocol norow;
 run;
 title;
@@ -276,7 +281,7 @@ title;
 * Checking some scores with images;
 title "Missclassifications";
 data _null_;
-	set mycas.train_scored
+	set casuser.train_scored
 	%display_img_error();
 run;
 title;
@@ -315,22 +320,22 @@ proc cas;
 /* Mutation HORIZONTAL_FLIP */
 image.processImages/
 	table={name="LargetrainData"}  
-	casout={caslib = "imagelib" name="hor", replace=TRUE} 
+	casout={caslib = "casuser" name="hor", replace=TRUE} 
 	imageFunctions={{functionOptions={functionType="MUTATIONS",type="HORIZONTAL_FLIP"}} };
 /* Mutation SHARPEN */
 image.processImages/
 	table={name="LargetrainData"}  
-	casout={caslib = "imagelib" name="sharp", replace=TRUE} 
+	casout={caslib = "casuser" name="sharp", replace=TRUE} 
 	imageFunctions={{functionOptions={functionType="MUTATIONS",type="SHARPEN"}} };
 /* Mutation DARKEN */
 image.processImages/
 	table={name="LargetrainData"}  
-	casout={caslib = "imagelib" name="dark", replace=TRUE} 
+	casout={caslib = "casuser" name="dark", replace=TRUE} 
 	imageFunctions={{functionOptions={functionType="MUTATIONS",type="DARKEN"}} };
 /* Mutation LIGHTEN */
 image.processImages/
 	table={name="LargetrainData"}  
-	casout={caslib = "imagelib" name="light", replace=TRUE} 
+	casout={caslib = "casuser" name="light", replace=TRUE} 
 	imageFunctions={{functionOptions={functionType="MUTATIONS",type="LIGHTEN"}} };
 run;
 
@@ -348,19 +353,19 @@ run;
 
 /* Loading the original images and their mutations */
 proc cas;
-	image.loadimages / caslib='imagelib' path='LargetrainDataTr' recurse=true labellevels=1 decode=true casout={name='LargetrainDataTr', replace=true};
+	image.loadimages / caslib='casuser' path='LargetrainDataTr' recurse=true labellevels=1 decode=true casout={name='LargetrainDataTr', replace=true};
 quit;
 
 /* Displaying the original image and their mutations */
 data _null_;
-	set mycas.LargetrainDataTr
+	set casuser.LargetrainDataTr
 	%display_img_comp(n=5530);
 run;
 
 /* Use PROC PARTITION to partition  each folder of images into train nd validation data partitions.  */
-proc partition data=mycas.LargetrainDataTr samppct=80 samppct2=20 seed=2023 partind;
+proc partition data=casuser.LargetrainDataTr samppct=80 samppct2=20 seed=2026 partind;
      by _label_;
-     output out=mycas.LargeImageDataTr;
+     output out=casuser.LargeImageDataTr;
 run;
 
 /* Use the shuffle action to  randomly sort the data */
@@ -383,7 +388,7 @@ proc cas;
         			algorithm={method='ADAM', lrpolicy='Step', gamma=0.6, stepsize=10,
        							beta1=0.9, beta2=0.999, learningrate=.01}
         			maxepochs=60} 
-        seed=2023;
+        seed=2026;
 quit;
 
 /* Score the data set					*/
@@ -397,7 +402,7 @@ quit;
 
 /* Confusion matrix */
 title "Confusion matrix with the original and mutated images";
-proc freq data=mycas.train_scored_tr;
+proc freq data=casuser.train_scored_tr;
 	table _label_*_DL_predname_ / nopercent nocol norow;
 run;
 title;
@@ -405,7 +410,7 @@ title;
 * Checking some scores with images;
 title "Missclassifications";
 data _null_;
-	set mycas.train_scored_tr
+	set casuser.train_scored_tr
 	%display_img_error();
 run;
 title;
