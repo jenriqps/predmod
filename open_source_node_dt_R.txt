@@ -15,14 +15,16 @@
 # After running the node, the Python or R code window in the node results displays
 # the actual code that was executed. START ENTERING YOUR CODE ON THE NEXT LINE.
 
-# Printing the R formula behind the logistic regression
-print("Formula or the R logistic regression:")
+library(rpart)
+
+# Printing the R formula behind the decision tree
+print("Formula or the R decision tree:")
 print(dm_model_formula)
 # Dimensions of the training data set
 cat("Dimensions of dm_traindf:",dim(dm_traindf),"\n")
 cat("Column names of dm_traindf:",colnames(dm_traindf),"\n")
-# Fitting the logistic regression to the training data frame
-dm_model <- glm(dm_model_formula,data=dm_traindf, family=binomial(link="logit"))
+# Fitting the decision to the training data frame
+dm_model <- rpart(dm_model_formula,data=dm_traindf, method = "class")
 # View model output
 summary(dm_model)
 
@@ -33,8 +35,9 @@ cat("dm_predictionvar[2]:",dm_predictionvar[2],"\n")
 cat("Dimensions of dm_inputdf:",dim(dm_inputdf),"\n")
 cat("Column names of dm_inputdf:",colnames(dm_inputdf),"\n")
 # All the data frame is scored. SAS wil identify internally which record is from the training and validate data frame.
-pred <- predict(dm_model, dm_inputdf,type="response")
+pred <- predict(dm_model, dm_inputdf,type="prob")
 dm_scoreddf <- data.frame(pred)
 colnames(dm_scoreddf) <- c(dm_predictionvar[2])
 dm_scoreddf[[dm_predictionvar[1]]] <- 1 - dm_scoreddf[[dm_predictionvar[2]]]
 summary(dm_scoreddf)
+
