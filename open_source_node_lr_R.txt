@@ -1,0 +1,39 @@
+# Python or R code based on the Language property.
+#
+# Note that a few lines of Python or R code are added before your code; for example:
+# Python:
+#  dm_class_input = ["class_var_1", "class_var_2"]
+#  dm_interval_input = ["numeric_var_1", "numeric_var_2"]
+# R:
+#  dm_class_input <- c("class_var_1", "class_var_2")
+#  dm_interval_input <- c("numeric_var_1", "numeric_var_2")
+#
+# For Python, use the Node Configuration section of the Project Settings to prepend
+# any configuration code, which is executed before the above code. During execution,
+# this code is automatically prepended to every node that runs Python code.
+#
+# After running the node, the Python or R code window in the node results displays
+# the actual code that was executed. START ENTERING YOUR CODE ON THE NEXT LINE.
+
+# Printing the R formula behind the logistic regression
+print("Formula or the R logistic regression:")
+print(dm_model_formula)
+# Dimensions of the training data set
+cat("Dimensions of dm_traindf:",dim(dm_traindf),"\n")
+cat("Column names of dm_traindf:",colnames(dm_traindf),"\n")
+# Fitting the logistic regression
+dm_model <- glm(dm_model_formula,data=dm_traindf, family=binomial(link="logit"))
+# View model output
+summary(dm_model)
+
+# Score
+# This scoring will be used by the Comparison models node.
+cat("dm_predictionvar[1]:",dm_predictionvar[1],"\n")
+cat("dm_predictionvar[2]:",dm_predictionvar[2],"\n")
+cat("Dimensions of dm_inputdf:",dim(dm_inputdf),"\n")
+cat("Column names of dm_inputdf:",colnames(dm_inputdf),"\n")
+pred <- predict(dm_model, dm_inputdf,type="response")
+dm_scoreddf <- data.frame(pred)
+colnames(dm_scoreddf) <- c(dm_predictionvar[2])
+dm_scoreddf[[dm_predictionvar[1]]] <- 1 - dm_scoreddf[[dm_predictionvar[2]]]
+summary(dm_scoreddf)
