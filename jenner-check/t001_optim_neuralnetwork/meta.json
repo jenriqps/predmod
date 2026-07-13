@@ -1,0 +1,7 @@
+{
+  "bundle": "t001_optim_neuralnetwork",
+  "source_file": "optim_neuralnetwork.sas",
+  "source_blob_sha": "70466a143e38a649c26dae4f5b79cd8e91f6224a",
+  "source_commit": "a90778960192cbdd5cb8f1b1764472488667f5e4",
+  "notes": "Pure PROC OPTMODEL (SAS/OR): trains a 2-hidden-layer sigmoid neural network by nonlinear optimization. Declares weight vars, impvar forward-pass expressions and L1/L2 regularization terms, minimizes a least-squares-plus-regularization loss, solves with NLPU tech=lbfgs, and prints the fitted weights. Fully self-contained (hyperparameters via %let, no external data, no libnames, no paths) so it runs byte-for-byte unmodified. autoexec adds only options obs=100. Deterministic across repeated runs (objective 0.2569166584)."
+}

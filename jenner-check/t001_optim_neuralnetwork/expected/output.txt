@@ -1,0 +1,25 @@
+The OPTMODEL Procedure
+
+                           Problem Summary
+  Objective Sense               Minimization
+  Objective Function            F
+  Objective Type                Nonlinear
+
+  Number of Variables           27
+  Bounded Above                 0
+  Bounded Below                 0
+  Bounded Below and Above       0
+  Free                          27
+  Fixed                         0
+
+  Number of Constraints         0
+
+                          Solution Summary
+  Solver                        NLP
+  Objective Function            F
+  Solution Status               Optimal
+  Objective Value               0.2569166584
+
+  W110           W111           W120           W121           W130           W131           W140           W141           W210           W211           W212           W213           W214           W220           W221           W222           W223           W224           W230           W231           W232           W233           W234             W0             W1             W2             W3
+
+  -0.0000         0.0005        -0.0000         0.0005        -0.0000         0.0005        -0.0000         0.0005        -0.0096        -0.0048        -0.0048        -0.0048        -0.0048        -0.0096        -0.0048        -0.0048        -0.0048        -0.0048        -0.0096        -0.0048        -0.0048        -0.0048        -0.0048         0.2756         0.1391         0.1391         0.1391
